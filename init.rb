@@ -7,7 +7,7 @@ rescue LoadError
   Rails.logger.error "Nokogiri gem not found, parsing hoptoad API v2 requests will be sub-optimal"
 end
 
-Dispatcher.to_prepare do
+config.to_prepare do
   Issue.send(:include, RedmineHoptoadServer::Patches::IssuePatch) unless Issue.include?(RedmineHoptoadServer::Patches::IssuePatch)
   IssueObserver.send(:include, RedmineHoptoadServer::Patches::IssueObserverPatch) unless IssueObserver.include?(RedmineHoptoadServer::Patches::IssueObserverPatch)
 end
