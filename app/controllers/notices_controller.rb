@@ -13,16 +13,16 @@ class NoticesController < ActionController::Base
     /^On\sline\s#\d+\sof/,
     /^\d+:/
   ]
-
+  
   def index_v2
-    logger.debug {"received v2 request:\n#{@notice.inspect}\nwith redmine_params:\n#{@redmine_params.inspect}"}
+    Rails.logger.debug {"received v2 request:\n#{@notice.inspect}\nwith redmine_params:\n#{@redmine_params.inspect}"}
     create_or_update_issue @redmine_params, @notice
   end
 
   def index
-    logger.debug {"received v1 request:\n#{@notice.inspect}\nwith redmine_params:\n#{@redmine_params.inspect}"}
+    Rails.logger.debug {"received v1 request:\n#{@notice.inspect}\nwith redmine_params:\n#{@redmine_params.inspect}"}
     notice = v2_notice_hash(@notice)
-    logger.debug {"transformed arguments:\n#{notice.inspect}"}
+    Rails.logger.debug {"transformed arguments:\n#{notice.inspect}"}
     create_or_update_issue @redmine_params, notice
   end
 
@@ -34,14 +34,14 @@ class NoticesController < ActionController::Base
     # project
     unless project = Project.find_by_identifier(redmine_params[:project])
       msg = "could not log error, project #{redmine_params[:project]} not found."
-      Rails.logger.error msg
+      Rails.Rails.logger.error msg
       render :text => msg, :status => 404 and return
     end
 
     # tracker
     unless tracker = project.trackers.find_by_name(redmine_params[:tracker])
       msg = "could not log error, tracker #{redmine_params[:tracker]} not found."
-      Rails.logger.error msg
+      Rails.Rails.logger.error msg
       render :text => msg, :status => 404 and return
     end
 
@@ -124,7 +124,7 @@ class NoticesController < ActionController::Base
       issue.save!
     rescue ActiveRecord::StaleObjectError
       if retried_once
-        Rails.logger.error "airbrake server: failed to update issue #{issue.id} for the second time, giving up."
+        Rails.Rails.logger.error "airbrake server: failed to update issue #{issue.id} for the second time, giving up."
       else
         retried_once = true
         retry
@@ -153,7 +153,7 @@ class NoticesController < ActionController::Base
       if line =~ /(.+):(\d+)(:in `(.+)')?/
         { 'number' => $2.to_i, 'method' => $4, 'file' => $1 }
       else
-        logger.error "could not parse backtrace line:\n#{line}"
+        Rails.logger.error "could not parse backtrace line:\n#{line}"
       end
     end
   end
@@ -186,7 +186,7 @@ class NoticesController < ActionController::Base
   end
 
   def parse_request
-    logger.debug { "hoptoad error notification:\n#{request.raw_post}" }
+    Rails.logger.debug { "hoptoad error notification:\n#{request.raw_post}" }
     case params[:action]
     when 'index_v2'
       if defined?(Nokogiri)
