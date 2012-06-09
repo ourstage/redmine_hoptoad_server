@@ -1,4 +1,3 @@
-require 'redmine'
 
 begin
   gem 'nokogiri'
@@ -6,6 +5,7 @@ begin
 rescue LoadError
   Rails.logger.error "Nokogiri gem not found, parsing hoptoad API v2 requests will be sub-optimal"
 end
+Rails.logger.info 'Starting Redmine Hoptoad Server'
 
 Rails.configuration.to_prepare do
   Issue.send(:include, RedmineHoptoadServer::Patches::IssuePatch) unless Issue.include?(RedmineHoptoadServer::Patches::IssuePatch)
